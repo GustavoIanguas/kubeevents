@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubeevents
+    app.kubernetes.io/instance: kubeevents
+  name: kubeevents
+  namespace: kubeevents
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: notifyevents
+        image: gustavoianguas/watch-webhook:1.0
+        ports:
+        - containerPort: 2000
+        env:
+        - name: SUBSCRIPTION
+          value: "<subscription id>"
+        - name: TENANT
+          value: "<tenant id>"
+        - name: RESOURCE_GROUP
+          value: "resource group name"
+        - name: AKS_NAME
+          value: "<aks name>"
+        - name: SP_USER
+          value: "<service principal user id>"
+        - name: SLACK_TOKEN
+          value: "<token do slack>"
+        - name: SLACK_CHANNEL
+          value: "<canal do slack>"
+        - name: SLACK_USERNAME
+          value: "<slack username>"
+        volumeMounts:
+        - name: secret
+          mountPath: "/var"
+          readOnly: true
+        imagePullPolicy: Always
+      volumes:
+      - name: secret
+        secret:
+          secretName: kubeevents
